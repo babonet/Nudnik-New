@@ -1,15 +1,17 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Switch } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Switch, Pressable } from 'react-native';
 import { useAlarms } from '../context/alarm-context';
 import { Alarm } from '../types/alarm';
 import { ThemedText } from './ThemedText';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 interface AlarmItemProps {
     alarm: Alarm;
+    onDelete: () => void;
 }
 
-export const AlarmItem = ({ alarm }: AlarmItemProps) => {
+export const AlarmItem: React.FC<AlarmItemProps> = ({ alarm, onDelete }) => {
     let alarmContextValue;
     try {
         alarmContextValue = useAlarms();
@@ -32,7 +34,10 @@ export const AlarmItem = ({ alarm }: AlarmItemProps) => {
     return (
         <TouchableOpacity 
             style={styles.container}
-            onPress={() => router.push(`/alarm-setup-screen`)}>
+            onPress={() => router.push({
+                pathname: '/alarm-setup-screen',
+                params: { id: alarm.id }
+            })}>
             <View style={styles.timeContainer}>
                 <ThemedText type="title">{formatTime(alarm.date)}</ThemedText>
                 <ThemedText>{alarm.task.type}</ThemedText>
@@ -41,6 +46,9 @@ export const AlarmItem = ({ alarm }: AlarmItemProps) => {
                 value={alarm.isEnabled}
                 onValueChange={() => toggleAlarm(alarm.id)}
             />
+            <Pressable onPress={onDelete} style={styles.deleteButton}>
+                <Ionicons name="trash-outline" size={24} color="#FF3B30" />
+            </Pressable>
         </TouchableOpacity>
     );
 };
@@ -56,5 +64,8 @@ const styles = StyleSheet.create({
     },
     timeContainer: {
         flex: 1,
+    },
+    deleteButton: {
+        padding: 8,
     },
 }); 

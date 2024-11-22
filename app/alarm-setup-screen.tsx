@@ -3,8 +3,8 @@ import { View, StyleSheet, Button } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { useAlarms } from '../context/alarm-context';
-import { TaskType } from '../types/alarm';
-import { useLocalSearchParams } from 'expo-router';
+import { Alarm, TaskType } from '../types/alarm';
+import { useLocalSearchParams, Stack } from 'expo-router';
 import { router } from 'expo-router';
 
 export default function AlarmSetupScreen() {
@@ -37,32 +37,35 @@ export default function AlarmSetupScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <Button title="Select Time" onPress={() => setShowPicker(true)} />
-            {showPicker && (
-                <DateTimePicker
-                    value={date}
-                    mode="time"
-                    onChange={(_, selectedDate) => {
-                        setShowPicker(false);
-                        setDate(selectedDate || date);
-                    }}
-                />
-            )}
-            
-            <Picker
-                selectedValue={taskType}
-                onValueChange={(value) => setTaskType(value as TaskType)}>
-                <Picker.Item label="Math Problem" value="MATH" />
-                <Picker.Item label="QR Code Scan" value="QR_CODE" />
-                <Picker.Item label="Bar Code Scan" value="BAR_CODE" />
-            </Picker>
+        <>
+            <Stack.Screen options={{ title: id ? "Edit Alarm" : "New Alarm" }} />
+            <View style={styles.container}>
+                <Button title="Select Time" onPress={() => setShowPicker(true)} />
+                {showPicker && (
+                    <DateTimePicker
+                        value={date}
+                        mode="time"
+                        onChange={(_, selectedDate) => {
+                            setShowPicker(false);
+                            setDate(selectedDate || date);
+                        }}
+                    />
+                )}
+                
+                <Picker
+                    selectedValue={taskType}
+                    onValueChange={(value) => setTaskType(value as TaskType)}>
+                    <Picker.Item label="Math Problem" value="MATH" />
+                    <Picker.Item label="QR Code Scan" value="QR_CODE" />
+                    <Picker.Item label="Bar Code Scan" value="BAR_CODE" />
+                </Picker>
 
-            <View style={styles.buttonContainer}>
-                <Button title="Cancel" onPress={() => router.back()} />
-                <Button title={id ? "Update Alarm" : "Save Alarm"} onPress={handleSave} />
+                <View style={styles.buttonContainer}>
+                    <Button title="Cancel" onPress={() => router.back()} />
+                    <Button title={id ? "Update Alarm" : "Save Alarm"} onPress={handleSave} />
+                </View>
             </View>
-        </View>
+        </>
     );
 }
 

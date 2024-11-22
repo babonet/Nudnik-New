@@ -1,36 +1,32 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, Pressable, Modal } from 'react-native';
+import { View, StyleSheet, FlatList, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAlarms } from '../context/alarm-context';
 import { AlarmItem } from '../components/alarm-item';
 import AlarmSetupScreen from './alarm-setup-screen';
+import { Alarm } from '@/types/alarm';
+import { Link, router } from 'expo-router';
 
 export default function HomeScreen() {
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const { alarms } = useAlarms();
+  const { alarms, removeAlarm, addAlarm } = useAlarms();
 
   return (
     <View style={styles.container}>
       <FlatList
         data={alarms}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <AlarmItem alarm={item} />}
+        renderItem={({ item }) => (
+          <AlarmItem 
+            alarm={item} 
+            onDelete={() => removeAlarm(item.id)} 
+          />
+        )}
       />
-      
-      <Pressable 
-        style={styles.fab}
-        onPress={() => setIsModalVisible(true)}
-      >
-        <Ionicons name="add" size={24} color="white" />
-      </Pressable>
-
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <AlarmSetupScreen onClose={() => setIsModalVisible(false)} />
-      </Modal>
+      <Link href="/alarm-setup-screen" asChild>
+        <Pressable style={styles.fab}>
+          <Ionicons name="add" size={24} color="white" />
+        </Pressable>
+      </Link>
     </View>
   );
 }

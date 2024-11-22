@@ -5,7 +5,7 @@ import { AlarmItem } from './alarm-item'
 import { ThemedText } from './ThemedText';
 
 export const AlarmList = () => {
-    const { alarms } = useAlarms();
+    const { alarms, removeAlarm } = useAlarms();
 
     if (alarms.length === 0) {
         return (
@@ -19,7 +19,7 @@ export const AlarmList = () => {
         <FlatList
             data={alarms}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <AlarmItem alarm={item} />}
+            renderItem={({ item }) => <AlarmItem alarm={item} onDelete={() => removeAlarm(item.id)} />}
             style={styles.container}
         />
     );
