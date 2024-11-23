@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Alarm } from '../types/alarm';
 import { scheduleAlarmNotification, cancelAlarmNotification } from '../utils/notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AlarmContextType {
     alarms: Alarm[];
@@ -15,6 +16,36 @@ const AlarmContext = createContext<AlarmContextType | undefined>(undefined);
 
 export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [alarms, setAlarms] = useState<Alarm[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Load alarms from storage on startup
+    useEffect(() => {
+        loadAlarms();
+    }, []);
+
+    const loadAlarms = async () => {
+        try {
+            const storedAlarms = await AsyncStorage.getItem('alarms');
+            if (storedAlarms) {
+                const parsedAlarms = JSON.parse(storedAlarms).map((alarm: any) => ({
+                    ...alarm,
+                    date: new Date(alarm.date)
+                }));
+                setAlarms(parsedAlarms);
+            }
+        } catch (error) {
+            console.error('Error loading alarms:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Save alarms whenever they change
+    useEffect(() => {
+        if (!isLoading) {
+            AsyncStorage.setItem('alarms', JSON.stringify(alarms));
+        }
+    }, [alarms, isLoading]);
 
     const addAlarm = useCallback(async (newAlarm: Omit<Alarm, 'id'>) => {
         const alarm: Alarm = {

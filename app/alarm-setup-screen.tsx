@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Button } from 'react-native';
+import { View, StyleSheet, Button, Text } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { useAlarms } from '../context/alarm-context';
@@ -17,7 +17,20 @@ export default function AlarmSetupScreen() {
     const [taskType, setTaskType] = useState<TaskType>(() => {
         return id ? getAlarm(id)?.task.type || 'MATH' : 'MATH';
     });
-    const [showPicker, setShowPicker] = useState(false);
+    const [showTimePicker, setShowTimePicker] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(false);
+
+    const formatTime = (date: Date) => {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const formatDate = (date: Date) => {
+        return date.toLocaleDateString([], { 
+            weekday: 'short',
+            month: 'short', 
+            day: 'numeric'
+        });
+    };
 
     const handleSave = () => {
         const alarmData = {
@@ -40,18 +53,56 @@ export default function AlarmSetupScreen() {
         <>
             <Stack.Screen options={{ title: id ? "Edit Alarm" : "New Alarm" }} />
             <View style={styles.container}>
-                <Button title="Select Time" onPress={() => setShowPicker(true)} />
-                {showPicker && (
+                <View style={styles.dateTimeContainer}>
+                    <View style={styles.dateTimeItem}>
+                        <Text style={styles.label}>Date: {formatDate(date)}</Text>
+                        <Button 
+                            title="Select Date" 
+                            onPress={() => setShowDatePicker(true)} 
+                        />
+                    </View>
+                    <View style={styles.dateTimeItem}>
+                        <Text style={styles.label}>Time: {formatTime(date)}</Text>
+                        <Button 
+                            title="Select Time" 
+                            onPress={() => setShowTimePicker(true)} 
+                        />
+                    </View>
+                </View>
+                {showDatePicker && (
+                    <DateTimePicker
+                        value={date}
+                        mode="date"
+                        onChange={(_, selectedDate) => {
+                            setShowDatePicker(false);
+                            if (selectedDate) {
+                                const newDate = new Date(date);
+                                newDate.setFullYear(
+                                    selectedDate.getFullYear(),
+                                    selectedDate.getMonth(),
+                                    selectedDate.getDate()
+                                );
+                                setDate(newDate);
+                            }
+                        }}
+                    />
+                )}
+                {showTimePicker && (
                     <DateTimePicker
                         value={date}
                         mode="time"
                         onChange={(_, selectedDate) => {
-                            setShowPicker(false);
-                            setDate(selectedDate || date);
+                            setShowTimePicker(false);
+                            if (selectedDate) {
+                                const newDate = new Date(date);
+                                newDate.setHours(selectedDate.getHours());
+                                newDate.setMinutes(selectedDate.getMinutes());
+                                setDate(newDate);
+                            }
                         }}
                     />
                 )}
-                
+
                 <Picker
                     selectedValue={taskType}
                     onValueChange={(value) => setTaskType(value as TaskType)}>
@@ -73,6 +124,16 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 16,
+    },
+    dateTimeContainer: {
+        marginBottom: 20,
+    },
+    dateTimeItem: {
+        marginBottom: 10,
+    },
+    label: {
+        fontSize: 16,
+        marginBottom: 5,
     },
     buttonContainer: {
         flexDirection: 'row',

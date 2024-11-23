@@ -31,6 +31,14 @@ export const AlarmItem: React.FC<AlarmItemProps> = ({ alarm, onDelete }) => {
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
+    const formatDate = (date: Date) => {
+        return date.toLocaleDateString([], { 
+            weekday: 'short',
+            month: 'short', 
+            day: 'numeric'
+        });
+    };
+
     return (
         <TouchableOpacity 
             style={styles.container}
@@ -40,6 +48,7 @@ export const AlarmItem: React.FC<AlarmItemProps> = ({ alarm, onDelete }) => {
             })}>
             <View style={styles.timeContainer}>
                 <ThemedText type="title">{formatTime(alarm.date)}</ThemedText>
+                <ThemedText>{formatDate(alarm.date)}</ThemedText>
                 <ThemedText>{alarm.task.type}</ThemedText>
             </View>
             <Switch
@@ -64,6 +73,7 @@ const styles = StyleSheet.create({
     },
     timeContainer: {
         flex: 1,
+        gap: 4,
     },
     deleteButton: {
         padding: 8,
